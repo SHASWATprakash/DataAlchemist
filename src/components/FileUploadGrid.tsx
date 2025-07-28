@@ -9,8 +9,14 @@ import DataGridRenderer from "./DataGridRenderer";
 
 type ParsedEntity = "clients" | "workers" | "tasks";
 
-export default function FileUploadGrid() {
-  const [data, setData] = useState<Record<ParsedEntity, any[]>>({
+type ParsedData = Record<ParsedEntity, any[]>;
+
+type Props = {
+  onParsed?: (data: ParsedData) => void;
+};
+
+export default function FileUploadGrid({ onParsed }: Props) {
+  const [data, setData] = useState<ParsedData>({
     clients: [],
     workers: [],
     tasks: [],
@@ -66,8 +72,14 @@ export default function FileUploadGrid() {
     loadSampleCSV();
   }, []);
 
+  // ✅ Inform parent AFTER data changes
+  useEffect(() => {
+    if (onParsed) onParsed(data);
+  }, [data, onParsed]);
+
   return (
     <div className="space-y-6 text-black">
+      {/* Upload Inputs */}
       <div className="grid gap-4">
         {(["clients", "workers", "tasks"] as ParsedEntity[]).map((entity) => (
           <label key={entity} className="flex flex-col font-medium">
@@ -82,6 +94,7 @@ export default function FileUploadGrid() {
         ))}
       </div>
 
+      {/* Preview Raw Normalized Data */}
       <div className="bg-gray-100 p-4 rounded max-h-[300px] overflow-auto">
         <h3 className="font-semibold mb-2">Parsed Preview (Normalized)</h3>
         <pre className="text-sm whitespace-pre-wrap">
@@ -89,6 +102,7 @@ export default function FileUploadGrid() {
         </pre>
       </div>
 
+      {/* Client Validation Errors Only */}
       {data.clients.length > 0 && (
         <div className="bg-red-100 text-red-800 p-4 rounded">
           <h4 className="font-semibold mb-2">Validation Errors: Clients</h4>
@@ -103,6 +117,7 @@ export default function FileUploadGrid() {
         </div>
       )}
 
+      {/* Render Tables */}
       {(["clients", "workers", "tasks"] as ParsedEntity[]).map((entity) => (
         <DataGridRenderer key={entity} entity={entity} data={data[entity]} />
       ))}

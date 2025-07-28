@@ -1,15 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import FileUploadGrid from "@/components/FileUploadGrid";
 import RuleBuilder from "@/components/RuleBuilder";
 import PrioritizationTuner from "@/components/PrioritizationTuner";
-import NaturalQueryBox from "@/components/NaturalQueryBox"; // ✅ Add this
+import NaturalQueryBox from "@/components/NaturalQueryBox";
+
+type ParsedEntity = "clients" | "workers" | "tasks";
+type ParsedData = Record<ParsedEntity, any[]>;
 
 export default function Home() {
-  // TODO: Replace these with actual state or props as needed
-  const rules: unknown = [];
-  const priorities: unknown = [];
-  const parsedCSVData: unknown = [];
+  const [parsedCSVData, setParsedCSVData] = useState<ParsedData>({
+    clients: [],
+    workers: [],
+    tasks: [],
+  });
+
+  const handleParsedData = (updated: ParsedData) => {
+    setParsedCSVData(updated);
+  };
 
   return (
     <main className="min-h-screen bg-white text-black p-10 space-y-10">
@@ -21,20 +30,20 @@ export default function Home() {
       </p>
 
       {/* 🔹 Step 1: Upload + Live Validation */}
-      <FileUploadGrid />
+      <FileUploadGrid onParsed={setParsedCSVData} />
 
       {/* 🔹 Step 2: Rule Builder */}
       <RuleBuilder />
 
       {/* 🔹 Step 3: Prioritization Weights */}
-      <PrioritizationTuner />
+      <PrioritizationTuner tasks={parsedCSVData.tasks} />
 
       {/* 🔹 Step 4: Natural Language Insights */}
-     <NaturalQueryBox
-  rules={rules}
-  priorities={priorities}
-  gridData={parsedCSVData}
-/>
+      <NaturalQueryBox
+        rules={[]} // update if rules come from RuleBuilder
+        priorities={[]} // update if priorities are exportable
+        gridData={parsedCSVData}
+      />
     </main>
   );
 }

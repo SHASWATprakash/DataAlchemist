@@ -1,64 +1,72 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 type Priority = {
   label: string;
   value: number;
 };
 
-const DEFAULT_PRIORITIES: Priority[] = [
-  { label: "Task A", value: 50 },
-  { label: "Task B", value: 75 },
-  { label: "Task C", value: 25 },
-];
+type Props = {
+  tasks: any[]; // expects parsed task objects with at least a `taskname`
+};
 
 const LOCAL_STORAGE_KEY = "prioritization-tasks";
 
-export default function PrioritizationTuner() {
-  const [priorities, setPriorities] = useState<Priority[]>(DEFAULT_PRIORITIES);
+export default function PrioritizationTuner({ tasks }: Props) {
+  const [priorities, setPriorities] = useState<Priority[]>([]);
 
-  // Load from localStorage on mount
+  // Sync with sample tasks
   useEffect(() => {
+    if (!tasks.length) return;
+
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (stored) {
       try {
         const parsed: Priority[] = JSON.parse(stored);
         setPriorities(parsed);
-      } catch (e) {
-        console.error("Error loading priorities from localStorage", e);
+        return;
+      } catch (err) {
+        console.error("Error loading stored priorities", err);
       }
     }
-  }, []);
 
-  // Save to localStorage whenever priorities change
+    // Init with parsed task names and default 50 weight
+    const initial = tasks.map((task) => ({
+      label: task.taskname || "Unnamed Task",
+      value: 50,
+    }));
+    setPriorities(initial);
+  }, [tasks]);
+
+  // Save on change
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(priorities));
   }, [priorities]);
 
-  const updatePriority = (index: number, newValue: number) => {
+  const updateLabel = (i: number, newLabel: string) => {
     const updated = [...priorities];
-    updated[index].value = newValue;
+    updated[i].label = newLabel;
     setPriorities(updated);
   };
 
-  const updateLabel = (index: number, newLabel: string) => {
+  const updateValue = (i: number, newVal: number) => {
     const updated = [...priorities];
-    updated[index].label = newLabel;
+    updated[i].value = newVal;
     setPriorities(updated);
   };
 
   const addTask = () => {
-    const newTask: Priority = { label: "New Task", value: 50 };
-    setPriorities([...priorities, newTask]);
+    setPriorities([...priorities, { label: "New Task", value: 50 }]);
   };
 
   const removeTask = (index: number) => {
     setPriorities(priorities.filter((_, i) => i !== index));
   };
 
-  const resetWeights = () => {
-    setPriorities(DEFAULT_PRIORITIES);
+  const resetToTasks = () => {
+    const fresh = tasks.map((t) => ({ label: t.taskname || "Unnamed Task", value: 50 }));
+    setPriorities(fresh);
   };
 
   const exportPriorities = () => {
@@ -94,7 +102,7 @@ export default function PrioritizationTuner() {
                 min={0}
                 max={100}
                 value={p.value}
-                onChange={(e) => updatePriority(i, Number(e.target.value))}
+                onChange={(e) => updateValue(i, Number(e.target.value))}
                 className="w-full"
               />
             </div>
@@ -116,10 +124,10 @@ export default function PrioritizationTuner() {
           📤 Export priorities.json
         </button>
         <button
-          onClick={resetWeights}
+          onClick={resetToTasks}
           className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded"
         >
-          🔄 Reset to Defaults
+          🔄 Reset to Task List
         </button>
         <button
           onClick={addTask}

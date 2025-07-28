@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧪 Data Alchemist
 
-## Getting Started
+An intelligent data scheduling and visualization tool that empowers users to upload, validate, edit, and apply rules to structured datasets (clients, tasks, workers). Includes AI-powered rule suggestions and error handling.
 
-First, run the development server:
+## 🚀 Live Demo
+
+👉 [https://data-alchemist-ashen.vercel.app](https://data-alchemist-ashen.vercel.app)
+
+## 📁 Project Structure
+
+├── public/samples/ # Sample CSV data: clients.csv, workers.csv, tasks.csv
+├── src/
+│ ├── components/ # UI components including FileUploadGrid, RuleBuilder, etc.
+│ ├── lib/ # Parsers, schema validators, rule definitions
+│ ├── app/api/ # API routes including OpenAI-based rule suggestion
+
+markdown
+Copy
+Edit
+
+## ✅ Features
+
+- 📄 Upload CSV/XLSX data (clients, workers, tasks)
+- 🧹 Normalize + validate data using Zod
+- 🧠 Rule Builder UI with validation per rule type
+- 💾 LocalStorage persistence + export to JSON
+- 🤖 AI rule suggestions using OpenAI
+- 📊 Editable data grid with inline edits
+- 🔁 Reset to defaults with sample data preload
+
+## 🧠 AI Capabilities (via OpenAI API)
+
+- Suggest scheduling rules based on uploaded data
+- Future-ready for:
+  - Natural language to rules
+  - Error correction
+  - AI validators & recommendations
+
+> ⚠️ Requires an `OPENAI_API_KEY` to enable AI suggestions.
+
+## 🛠️ Setup
 
 ```bash
+# Clone and install dependencies
+git clone https://github.com/SHASWATprakash/DataAlchemist
+cd DataAlchemist
+npm install
+
+# Run locally
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+🌍 Environment Variables
+Create a .env.local:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+env
+Copy
+Edit
+OPENAI_API_KEY=your-key-here
+🧪 Sample Data
+Add sample files under /public/samples/:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+clients.csv
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+workers.csv
 
-## Learn More
+tasks.csv
 
-To learn more about Next.js, take a look at the following resources:
+These auto-load on first mount.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+📤 Deployment
+This app is auto-deployed via Vercel:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+https://data-alchemist-ashen.vercel.app
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📜 License
+SHASWATP

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ruleSchemas, RuleUnionSchema, Rule } from "@/lib/ruleSchemas";
 import NaturalLanguageRuleBox from "@/components/NaturalLanguageRuleBox";
+import { fetchRuleSuggestions } from "@/hooks/useRuleSuggestions";
 
 type RuleType = Rule["type"];
 type RuleErrors = { [key: number]: string };
@@ -227,6 +228,19 @@ export default function RuleBuilder() {
       >
         📤 Export rules.json
       </button>
+      {/* TODO: Replace these with actual data from your app context or props */}
+      <button
+  onClick={async () => {
+    // Example placeholder data
+    const columnHeaders: string[] = []; // e.g., ["Task", "Phase", "Group"]
+    const dataRows: any[] = []; // e.g., [{ Task: "A", Phase: 1, Group: "X" }]
+    const suggestions = await fetchRuleSuggestions(columnHeaders, dataRows);
+    setRules((prev) => [...prev, ...suggestions]);
+  }}
+  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+>
+  🤖 Suggest Rules
+</button>
     </div>
   );
 }

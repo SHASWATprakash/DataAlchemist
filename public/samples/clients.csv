@@ -1,4 +1,4 @@
-clientid,clientname,projecttype,startphase,endphase
-C001,Acme Corp,Data Analysis,1,3
-C002,Globex Inc,Web Scraping,2,4
-C003,Initech,ML Pipeline,1,2
+clientId,clientName,priorityLevel,requestedTaskIds
+C001,Acme Corp,1,"[T001, T002]"
+C002,Globex Inc,2,"[T003]"
+C003,Initech Ltd,3,"[T001, T004]"

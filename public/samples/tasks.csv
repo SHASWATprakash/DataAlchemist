@@ -1,5 +1,5 @@
-taskid,clientid,requiredskill,phase
-T002,C002,Frontend Development,2
-T003,C003,Backend Development,1
-T004,C004,Data Cleaning,3
-T005,C001,Data Analysis,2
+taskid,clientid,description,requiredskills,phase
+T001,C001,"Analyze sales data","[Data Analysis]","1"
+T002,C002,"Scrape competitor websites","[Web Scraping]","2"
+T003,C003,"Train ML model","[ML Engineering]","1"
+T004,C001,"Visualize insights","[Python]","2"

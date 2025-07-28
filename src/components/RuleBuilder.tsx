@@ -1,17 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { ruleSchemas, RuleUnionSchema, Rule } from "@/lib/ruleSchemas";
+import { z } from "zod";
 
-type RuleType = "coRun" | "slotRestriction" | "phaseWindow" | "loadLimit";
-
-type Rule =
-  | { type: "coRun"; tasks: string[] }
-  | { type: "slotRestriction"; group: string; minCommonSlots: number }
-  | { type: "phaseWindow"; task: string; allowedPhases: number[] }
-  | { type: "loadLimit"; group: string; maxSlotsPerPhase: number };
+type RuleType = Rule["type"];
+type RuleErrors = { [key: number]: string };
 
 export default function RuleBuilder() {
   const [rules, setRules] = useState<Rule[]>([]);
+  const [errors, setErrors] = useState<RuleErrors>({});
   const [selectedRuleType, setSelectedRuleType] = useState<RuleType>("coRun");
 
   const addRule = () => {
@@ -24,29 +22,36 @@ export default function RuleBuilder() {
         newRule = { type: "slotRestriction", group: "", minCommonSlots: 1 };
         break;
       case "phaseWindow":
-        newRule = { type: "phaseWindow", task: "", allowedPhases: [1] };
+        newRule = { type: "phaseWindow", task: "", allowedPhases: [] };
         break;
       case "loadLimit":
         newRule = { type: "loadLimit", group: "", maxSlotsPerPhase: 1 };
         break;
     }
-
     setRules((prev) => [...prev, newRule]);
   };
 
-  const updateRule = (index: number, updated: Rule) => {
-    setRules((prev) => prev.map((r, i) => (i === index ? updated : r)));
+  const handleChange = (index: number, field: string, value: any) => {
+    const updated = [...rules];
+    (updated[index] as any)[field] = value;
+    setRules(updated);
+
+    const schema = ruleSchemas[updated[index].type];
+    const result = schema.safeParse(updated[index]);
+    setErrors((prev) => ({
+      ...prev,
+      [index]: result.success ? "" : result.error.errors[0]?.message,
+    }));
   };
 
-  const deleteRule = (index: number) => {
-    setRules((prev) => prev.filter((_, i) => i !== index));
-  };
+  const isValid = () =>
+    rules.every((rule, i) => ruleSchemas[rule.type].safeParse(rule).success);
 
   return (
-    <div className="mt-10 p-6 bg-white rounded shadow space-y-6 text-black">
+    <div className="mt-10 p-6 bg-white rounded shadow space-y-4 text-black">
       <h2 className="text-xl font-semibold">📏 Rule Builder</h2>
 
-      <div className="flex gap-4 items-center">
+      <div className="flex flex-wrap gap-4 items-center">
         <select
           className="border px-3 py-2 rounded"
           value={selectedRuleType}
@@ -68,47 +73,36 @@ export default function RuleBuilder() {
 
       <div className="space-y-4">
         {rules.map((rule, index) => (
-          <div key={index} className="bg-gray-100 p-4 rounded space-y-2">
-            <div className="flex justify-between items-center">
-              <strong className="text-sm uppercase text-gray-600">{rule.type}</strong>
-              <button
-                onClick={() => deleteRule(index)}
-                className="text-red-600 text-sm hover:underline"
-              >
-                🗑️ Delete
-              </button>
-            </div>
+          <div key={index} className="p-4 bg-gray-50 rounded border space-y-2">
+            <div className="text-sm font-semibold">{rule.type}</div>
 
             {rule.type === "coRun" && (
               <input
-                type="text"
+                className="w-full p-2 border rounded"
                 value={rule.tasks.join(",")}
                 onChange={(e) =>
-                  updateRule(index, { ...rule, tasks: e.target.value.split(",").map(t => t.trim()) })
+                  handleChange(index, "tasks", e.target.value.split(","))
                 }
                 placeholder="Tasks (comma separated)"
-                className="w-full p-2 border rounded"
               />
             )}
 
             {rule.type === "slotRestriction" && (
               <>
                 <input
-                  type="text"
-                  value={rule.group}
-                  onChange={(e) => updateRule(index, { ...rule, group: e.target.value })}
-                  placeholder="Group Name"
                   className="w-full p-2 border rounded"
+                  value={rule.group}
+                  onChange={(e) => handleChange(index, "group", e.target.value)}
+                  placeholder="Group"
                 />
                 <input
                   type="number"
+                  className="w-full p-2 border rounded"
                   value={rule.minCommonSlots}
-                  min={1}
                   onChange={(e) =>
-                    updateRule(index, { ...rule, minCommonSlots: parseInt(e.target.value) })
+                    handleChange(index, "minCommonSlots", Number(e.target.value))
                   }
                   placeholder="Min Common Slots"
-                  className="w-full p-2 border rounded"
                 />
               </>
             )}
@@ -116,23 +110,22 @@ export default function RuleBuilder() {
             {rule.type === "phaseWindow" && (
               <>
                 <input
-                  type="text"
-                  value={rule.task}
-                  onChange={(e) => updateRule(index, { ...rule, task: e.target.value })}
-                  placeholder="Task Name"
                   className="w-full p-2 border rounded"
+                  value={rule.task}
+                  onChange={(e) => handleChange(index, "task", e.target.value)}
+                  placeholder="Task"
                 />
                 <input
-                  type="text"
+                  className="w-full p-2 border rounded"
                   value={rule.allowedPhases.join(",")}
                   onChange={(e) =>
-                    updateRule(index, {
-                      ...rule,
-                      allowedPhases: e.target.value.split(",").map((n) => parseInt(n.trim())),
-                    })
+                    handleChange(
+                      index,
+                      "allowedPhases",
+                      e.target.value.split(",").map((v) => Number(v.trim()))
+                    )
                   }
                   placeholder="Allowed Phases (comma separated)"
-                  className="w-full p-2 border rounded"
                 />
               </>
             )}
@@ -140,32 +133,32 @@ export default function RuleBuilder() {
             {rule.type === "loadLimit" && (
               <>
                 <input
-                  type="text"
-                  value={rule.group}
-                  onChange={(e) => updateRule(index, { ...rule, group: e.target.value })}
-                  placeholder="Group Name"
                   className="w-full p-2 border rounded"
+                  value={rule.group}
+                  onChange={(e) => handleChange(index, "group", e.target.value)}
+                  placeholder="Group"
                 />
                 <input
                   type="number"
-                  value={rule.maxSlotsPerPhase}
-                  min={1}
-                  onChange={(e) =>
-                    updateRule(index, {
-                      ...rule,
-                      maxSlotsPerPhase: parseInt(e.target.value),
-                    })
-                  }
-                  placeholder="Max Slots per Phase"
                   className="w-full p-2 border rounded"
+                  value={rule.maxSlotsPerPhase}
+                  onChange={(e) =>
+                    handleChange(index, "maxSlotsPerPhase", Number(e.target.value))
+                  }
+                  placeholder="Max Slots/Phase"
                 />
               </>
+            )}
+
+            {errors[index] && (
+              <p className="text-red-500 text-xs">{errors[index]}</p>
             )}
           </div>
         ))}
       </div>
 
       <button
+        disabled={!isValid()}
         onClick={() => {
           const blob = new Blob([JSON.stringify({ rules }, null, 2)], {
             type: "application/json",
@@ -176,9 +169,11 @@ export default function RuleBuilder() {
           link.download = "rules.json";
           link.click();
         }}
-        className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+        className={`mt-4 px-4 py-2 rounded text-white ${
+          isValid() ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
+        }`}
       >
-         Export rules.json
+        Export rules.json
       </button>
     </div>
   );

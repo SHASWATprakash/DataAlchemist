@@ -1,0 +1,5 @@
+task_id,client_id,required_skill,phase
+T001,C001,Data Analysis,1
+T002,C002,Frontend Development,2
+T003,C003,Backend Development,1
+T004,C004,Data Cleaning,3

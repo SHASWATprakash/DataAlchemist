@@ -1,4 +1,4 @@
-clientId,clientName,priorityLevel,requestedTaskIds
-C001,Acme Corp,1,"[T001, T002]"
-C002,Globex Inc,2,"[T003]"
-C003,Initech Ltd,3,"[T001, T004]"
+ClientID,ClientName,PriorityLevel,RequestedTaskIDs,GroupTag,AttributesJSON
+C001,AlphaCorp,3,T001|T003,Enterprise,"{""location"":""NY"",""budget"":50000}"
+C002,BetaLtd,2,T002|T004|T005,Startup,"{""location"":""SF"",""industry"":""Tech""}"
+C003,GammaInc,5,T001|T005,Enterprise,"{""location"":""Chicago"",""urgent"":true}"

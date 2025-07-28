@@ -1,5 +1,6 @@
-taskid,clientid,description,requiredskills,phase
-T001,C001,"Analyze sales data","[Data Analysis]","1"
-T002,C002,"Scrape competitor websites","[Web Scraping]","2"
-T003,C003,"Train ML model","[ML Engineering]","1"
-T004,C001,"Visualize insights","[Python]","2"
+TaskID,TaskName,Category,Duration,RequiredSkills,PreferredPhases,MaxConcurrent
+T001,Build UI,Frontend,2,Frontend Development|CSS,"1-3",2
+T002,Write API,Backend,3,Backend Development|API Design,"[2,4]",1
+T003,Data Cleanup,Data Ops,1,Data Cleaning,"[1,2,3]",3
+T004,Analytics Setup,Data,2,Data Analysis,"2-3",2
+T005,Model Training,AI,4,ML|Data Cleaning,"[3,4]",1

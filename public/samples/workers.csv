@@ -1,4 +1,5 @@
-workerid,skills,availablephases
-W001,"[Data Analysis, Python]","[1,2,3]"
-W002,"[Web Scraping, JavaScript]","[2,3,4]"
-W003,"[ML Engineering, Data Cleaning]","[1,2]"
+WorkerID,WorkerName,Skills,AvailableSlots,MaxLoadPerPhase,WorkerGroup,QualificationLevel
+W001,Alice,Frontend Development|Data Cleaning,"[1,2,3]",2,TeamA,Senior
+W002,Bob,Backend Development|API Design,"[1,3]",3,TeamB,Mid
+W003,Charlie,Data Cleaning|Testing,"[2,3,4]",2,TeamA,Junior
+W004,Diana,Data Analysis|ML,"[1,2]",2,TeamC,Senior

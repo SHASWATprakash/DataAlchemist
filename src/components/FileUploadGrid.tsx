@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { parseCSV } from "@/lib/parseCSV";
 import { parseXLSX } from "@/lib/parseXLSX";
-import { normalizeRows } from "@/lib/normalizeHeaders" ;
+import { normalizeRows } from "@/lib/normalizeHeaders";
 import { validateClientRow } from "@/lib/schemas";
 import DataGridRenderer from "./DataGridRenderer";
 
@@ -28,7 +28,8 @@ export default function FileUploadGrid() {
 
     try {
       if (ext === "csv") {
-        parsedData = await parseCSV(file);
+        const text = await file.text();
+        parsedData = await parseCSV(text);
       } else if (ext === "xlsx") {
         parsedData = await parseXLSX(file);
       } else {
@@ -38,11 +39,37 @@ export default function FileUploadGrid() {
 
       const normalized = normalizeRows(parsedData);
       setData((prev) => ({ ...prev, [entity]: normalized }));
+     
+
+
     } catch (err) {
-      console.error("Parsing failed:", err);
+      console.error(`❌ Failed to parse ${entity}:`, err);
+      
       alert("Failed to parse file");
     }
   };
+
+  useEffect(() => {
+    const loadSampleData = async () => {
+      const entities: ParsedEntity[] = ["clients", "workers", "tasks"];
+
+      for (const entity of entities) {
+        try {
+          const res = await fetch(`/samples/${entity}.csv`);
+          if (!res.ok) throw new Error(`Status ${res.status}`);
+          const text = await res.text();
+          const parsed = await parseCSV(text);
+          const normalized = normalizeRows(parsed);
+
+          setData((prev) => ({ ...prev, [entity]: normalized }));
+        } catch (err) {
+          console.warn(`⚠️ Failed to load sample ${entity}.csv:`, err);
+        }
+      }
+    };
+
+    loadSampleData();
+  }, []);
 
   return (
     <div className="space-y-6 text-black">
@@ -60,7 +87,6 @@ export default function FileUploadGrid() {
         ))}
       </div>
 
-      {/* Raw parsed preview */}
       <div className="bg-gray-100 p-4 rounded max-h-[300px] overflow-auto">
         <h3 className="font-semibold mb-2">Parsed Preview (Normalized)</h3>
         <pre className="text-sm whitespace-pre-wrap">
@@ -68,7 +94,6 @@ export default function FileUploadGrid() {
         </pre>
       </div>
 
-      {/* Validation Feedback (Clients Only for Now) */}
       {data.clients.length > 0 && (
         <div className="bg-red-100 text-red-800 p-4 rounded">
           <h4 className="font-semibold mb-2">Validation Errors: Clients</h4>
@@ -83,7 +108,6 @@ export default function FileUploadGrid() {
         </div>
       )}
 
-      {/* Render editable grids */}
       {(["clients", "workers", "tasks"] as ParsedEntity[]).map((entity) => (
         <DataGridRenderer key={entity} entity={entity} data={data[entity]} />
       ))}

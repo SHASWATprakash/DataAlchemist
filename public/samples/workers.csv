@@ -1,0 +1,5 @@
+workerid,skills,availablephases
+W001,"[Frontend Development, Data Cleaning]","[1,2]"
+W002,"[Backend Development]","[1]"
+W003,"[Data Cleaning, Backend Development]","[2,3]"
+W004,"[Data Analysis]","[1,2]"

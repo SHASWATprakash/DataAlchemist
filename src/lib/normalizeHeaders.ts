@@ -3,8 +3,8 @@ export const normalizeHeaders = (row: Record<string, any>) => {
   Object.entries(row).forEach(([key, value]) => {
     const normKey = key
       .toLowerCase()
-      .replace(/\s+/g, "")        // remove spaces
-      .replace(/[^a-z0-9]/gi, ""); // remove special chars
+      .replace(/\s+/g, "")
+      .replace(/[^a-z0-9]/gi, "");
     normalized[normKey] = value;
   });
   return normalized;

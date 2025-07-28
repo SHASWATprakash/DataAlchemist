@@ -7,9 +7,8 @@ import { normalizeRows } from "@/lib/normalizeHeaders";
 import { validateClientRow } from "@/lib/schemas";
 import DataGridRenderer from "./DataGridRenderer";
 
-type ParsedEntity = "clients" | "workers" | "tasks";
-
-type ParsedData = Record<ParsedEntity, any[]>;
+export type ParsedEntity = "clients" | "workers" | "tasks";
+export type ParsedData = Record<ParsedEntity, any[]>;
 
 type Props = {
   onParsed?: (data: ParsedData) => void;

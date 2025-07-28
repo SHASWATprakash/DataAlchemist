@@ -1,16 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ruleSchemas, RuleUnionSchema, Rule } from "@/lib/ruleSchemas";
-import { z } from "zod";
 
 type RuleType = Rule["type"];
 type RuleErrors = { [key: number]: string };
+
+const LOCAL_KEY = "data-alchemist-rules";
 
 export default function RuleBuilder() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [errors, setErrors] = useState<RuleErrors>({});
   const [selectedRuleType, setSelectedRuleType] = useState<RuleType>("coRun");
+
+  // 🔄 Load rules from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem(LOCAL_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        const validated = parsed.filter((r: any) =>
+          RuleUnionSchema.safeParse(r).success
+        );
+        setRules(validated);
+      } catch {
+        console.warn("⚠️ Invalid localStorage format, ignoring");
+      }
+    }
+  }, []);
+
+  // 💾 Save to localStorage on every change
+  useEffect(() => {
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(rules));
+  }, [rules]);
 
   const addRule = () => {
     let newRule: Rule;
@@ -45,7 +67,7 @@ export default function RuleBuilder() {
   };
 
   const isValid = () =>
-    rules.every((rule, i) => ruleSchemas[rule.type].safeParse(rule).success);
+    rules.every((rule) => ruleSchemas[rule.type].safeParse(rule).success);
 
   return (
     <div className="mt-10 p-6 bg-white rounded shadow space-y-4 text-black">

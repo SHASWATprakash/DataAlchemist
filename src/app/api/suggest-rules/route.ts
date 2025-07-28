@@ -1,16 +1,17 @@
 // src/app/api/suggest-rules/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { OpenAI } from "openai"; // or use fetch with OpenAI API
+import { OpenAI } from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { headers, sampleRows, prompt } = body;
+  try {
+    const body = await req.json();
+    const { headers, sampleRows, prompt } = body;
 
-  const systemPrompt = `
+    const systemPrompt = `
 You are a helpful assistant for a data scheduling tool.
 Based on column headers and sample rows, recommend JSON rules of types:
 - coRun: { type: "coRun", tasks: [...] }
@@ -21,21 +22,32 @@ Based on column headers and sample rows, recommend JSON rules of types:
 Return a JSON array of valid rules only. No explanation.
 `;
 
-  const userPrompt = prompt || `Headers: ${headers.join(", ")}\nSample: ${JSON.stringify(sampleRows[0])}`;
+    const userPrompt = prompt || `Headers: ${headers.join(", ")}\nSample: ${JSON.stringify(sampleRows[0])}`;
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt }
-    ],
-    response_format: { type: "json_object" },
-  });
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", // ✅ downgraded from gpt-4o
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    });
 
-  try {
-    const parsed = JSON.parse(completion.choices[0].message.content ?? "[]");
-    return NextResponse.json({ rules: parsed });
-  } catch (err) {
-    return NextResponse.json({ rules: [], error: "Invalid AI response" }, { status: 500 });
+    const content = completion.choices?.[0]?.message?.content;
+
+    try {
+      const parsed = JSON.parse(content || "[]");
+      return NextResponse.json({ rules: parsed });
+    } catch {
+      return NextResponse.json(
+        { rules: [], error: "Invalid JSON response from OpenAI" },
+        { status: 500 }
+      );
+    }
+  } catch (err: any) {
+    console.error(" OpenAI Suggest Rules Error:", err);
+    return NextResponse.json(
+      { rules: [], error: err?.message || "OpenAI request failed" },
+      { status: 500 }
+    );
   }
 }

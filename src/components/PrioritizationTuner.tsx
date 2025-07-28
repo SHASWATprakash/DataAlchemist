@@ -2,62 +2,58 @@
 
 import { useState } from "react";
 
-const criteria = [
-  { id: "priorityLevel", label: "Client Priority Level" },
-  { id: "taskFulfillment", label: "Requested Task Fulfillment" },
-  { id: "fairness", label: "Fair Distribution Across Clients" },
-  { id: "loadBalance", label: "Even Load Across Workers" }
-];
+type Priority = {
+  label: string;
+  value: number;
+};
 
 export default function PrioritizationTuner() {
-  const [weights, setWeights] = useState<Record<string, number>>({
-    priorityLevel: 3,
-    taskFulfillment: 3,
-    fairness: 3,
-    loadBalance: 3
-  });
+  const [priorities, setPriorities] = useState<Priority[]>([
+    { label: "Task A", value: 50 },
+    { label: "Task B", value: 75 },
+    { label: "Task C", value: 25 },
+  ]);
 
-  const updateWeight = (key: string, value: number) => {
-    setWeights((prev) => ({ ...prev, [key]: value }));
+  const updatePriority = (index: number, newValue: number) => {
+    const updated = [...priorities];
+    updated[index].value = newValue;
+    setPriorities(updated);
   };
 
-  const exportWeights = () => {
-    const blob = new Blob([JSON.stringify({ prioritization: weights }, null, 2)], {
-      type: "application/json"
+  const exportPriorities = () => {
+    const blob = new Blob([JSON.stringify({ priorities }, null, 2)], {
+      type: "application/json",
     });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "prioritization.json";
-    link.click();
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "priorities.json";
+    a.click();
   };
 
   return (
-    <div className="mt-10 p-6 bg-white rounded shadow space-y-6 text-black">
-      <h2 className="text-xl font-semibold">⚖️ Prioritization Settings</h2>
+    <div className="p-6 mt-10 bg-white rounded shadow space-y-4 text-black">
+      <h2 className="text-xl font-semibold">🎯 Prioritization Tuner</h2>
 
-      <div className="grid gap-6">
-        {criteria.map((c) => (
-          <div key={c.id} className="space-y-1">
-            <label className="block text-sm font-medium">{c.label}</label>
-            <input
-              type="range"
-              min={1}
-              max={5}
-              value={weights[c.id]}
-              onChange={(e) => updateWeight(c.id, Number(e.target.value))}
-              className="w-full"
-            />
-            <span className="text-xs text-gray-500">Weight: {weights[c.id]}</span>
-          </div>
-        ))}
-      </div>
+      {priorities.map((p, i) => (
+        <div key={i} className="space-y-1">
+          <label className="font-medium">{p.label} — {p.value}</label>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={p.value}
+            onChange={(e) => updatePriority(i, Number(e.target.value))}
+            className="w-full"
+          />
+        </div>
+      ))}
 
       <button
-        onClick={exportWeights}
+        onClick={exportPriorities}
         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
       >
-         Export prioritization.json
+        📤 Export priorities.json
       </button>
     </div>
   );

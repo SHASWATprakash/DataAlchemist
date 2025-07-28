@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import Papa from "papaparse";
-import * as XLSX from "xlsx";
+import { useState } from "react";
+import { parseCSV } from "@/lib/parseCSV";
+import { parseXLSX } from "@/lib/parseXLSX";
 
 type ParsedEntity = "clients" | "workers" | "tasks";
 
@@ -14,33 +14,30 @@ export default function FileUploadGrid() {
   });
 
   const handleFile = async (
-    event: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>,
     entity: ParsedEntity
   ) => {
-    const file = event.target.files?.[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    const extension = file.name.split(".").pop();
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    let parsedData: any[] = [];
 
-    if (extension === "csv") {
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (result) => {
-          setData((prev) => ({ ...prev, [entity]: result.data }));
-        },
-      });
-    } else if (extension === "xlsx") {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const wb = XLSX.read(e.target?.result, { type: "binary" });
-        const sheet = wb.Sheets[wb.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(sheet);
-        setData((prev) => ({ ...prev, [entity]: json }));
-      };
-      reader.readAsBinaryString(file);
-    } else {
-      alert("Unsupported file type. Use CSV or XLSX.");
+    try {
+      if (ext === "csv") {
+        parsedData = await parseCSV(file);
+      } else if (ext === "xlsx") {
+        parsedData = await parseXLSX(file);
+      } else {
+        alert("Unsupported file format");
+        return;
+      }
+
+      // TODO: Normalize headers here if needed
+      setData((prev) => ({ ...prev, [entity]: parsedData }));
+    } catch (err) {
+      console.error("Parsing failed:", err);
+      alert("Failed to parse file");
     }
   };
 

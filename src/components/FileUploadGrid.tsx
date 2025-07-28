@@ -16,17 +16,17 @@ export default function FileUploadGrid() {
     tasks: [],
   });
 
-  const handleFile = async (
+  const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     entity: ParsedEntity
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const ext = file.name.split(".").pop()?.toLowerCase();
-    let parsedData: any[] = [];
-
     try {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      let parsedData: any[] = [];
+
       if (ext === "csv") {
         const text = await file.text();
         parsedData = await parseCSV(text);
@@ -39,18 +39,14 @@ export default function FileUploadGrid() {
 
       const normalized = normalizeRows(parsedData);
       setData((prev) => ({ ...prev, [entity]: normalized }));
-     
-
-
     } catch (err) {
       console.error(`❌ Failed to parse ${entity}:`, err);
-      
-      alert("Failed to parse file");
+      alert(`Failed to parse ${entity} file`);
     }
   };
 
   useEffect(() => {
-    const loadSampleData = async () => {
+    const loadSampleCSV = async () => {
       const entities: ParsedEntity[] = ["clients", "workers", "tasks"];
 
       for (const entity of entities) {
@@ -60,15 +56,14 @@ export default function FileUploadGrid() {
           const text = await res.text();
           const parsed = await parseCSV(text);
           const normalized = normalizeRows(parsed);
-
           setData((prev) => ({ ...prev, [entity]: normalized }));
         } catch (err) {
-          console.warn(`⚠️ Failed to load sample ${entity}.csv:`, err);
+          console.warn(`⚠️ Failed to load /samples/${entity}.csv:`, err);
         }
       }
     };
 
-    loadSampleData();
+    loadSampleCSV();
   }, []);
 
   return (
@@ -80,7 +75,7 @@ export default function FileUploadGrid() {
             <input
               type="file"
               accept=".csv,.xlsx"
-              onChange={(e) => handleFile(e, entity)}
+              onChange={(e) => handleFileUpload(e, entity)}
               className="mt-1"
             />
           </label>

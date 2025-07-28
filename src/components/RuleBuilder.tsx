@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ruleSchemas, RuleUnionSchema, Rule } from "@/lib/ruleSchemas";
+import NaturalLanguageRuleBox from "@/components/NaturalLanguageRuleBox";
 
 type RuleType = Rule["type"];
 type RuleErrors = { [key: number]: string };
@@ -66,6 +67,12 @@ export default function RuleBuilder() {
     }));
   };
 
+  const handleDelete = (index: number) => {
+    const updated = [...rules];
+    updated.splice(index, 1);
+    setRules(updated);
+  };
+
   const isValid = () =>
     rules.every((rule) => ruleSchemas[rule.type].safeParse(rule).success);
 
@@ -73,6 +80,19 @@ export default function RuleBuilder() {
     <div className="mt-10 p-6 bg-white rounded shadow space-y-4 text-black">
       <h2 className="text-xl font-semibold">📏 Rule Builder</h2>
 
+      {/* 🤖 Natural Language Box */}
+      <NaturalLanguageRuleBox
+        onAddRule={(rule) => {
+          const parsed = RuleUnionSchema.safeParse(rule);
+          if (parsed.success) {
+            setRules((prev) => [...prev, parsed.data]);
+          } else {
+            console.warn("❌ Invalid rule from AI:", parsed.error);
+          }
+        }}
+      />
+
+      {/* 🔘 Rule type selector */}
       <div className="flex flex-wrap gap-4 items-center">
         <select
           className="border px-3 py-2 rounded"
@@ -93,10 +113,19 @@ export default function RuleBuilder() {
         </button>
       </div>
 
+      {/* 🧱 Editable Cards */}
       <div className="space-y-4">
         {rules.map((rule, index) => (
           <div key={index} className="p-4 bg-gray-50 rounded border space-y-2">
-            <div className="text-sm font-semibold">{rule.type}</div>
+            <div className="text-sm font-semibold flex justify-between items-center">
+              {rule.type}
+              <button
+                className="text-xs text-red-600"
+                onClick={() => handleDelete(index)}
+              >
+                ✖ Delete
+              </button>
+            </div>
 
             {rule.type === "coRun" && (
               <input
@@ -179,6 +208,7 @@ export default function RuleBuilder() {
         ))}
       </div>
 
+      {/* 📤 Export Button */}
       <button
         disabled={!isValid()}
         onClick={() => {
@@ -195,7 +225,7 @@ export default function RuleBuilder() {
           isValid() ? "bg-green-600 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
         }`}
       >
-        Export rules.json
+        📤 Export rules.json
       </button>
     </div>
   );
